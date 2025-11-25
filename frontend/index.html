@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Registration</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .event { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Events</h1>
+  <div id="events"></div>
+<h2>Add Event</h2>
+<form id="eventForm">
+  <input id="title" placeholder="Title" required />
+  <input id="date" type="date" required />
+  <textarea id="description" placeholder="Description"></textarea>
+  <button type="submit">Add Event</button>
+</form>
+<h2>Add Participant</h2>
+<form id="participantForm">
+  <input id="pname" placeholder="Name" required />
+  <input id="pemail" type="email" placeholder="Email" required />
+  <button type="submit">Add Participant</button>
+</form>
+
+<div id="participants"></div>
+
+<h2>Register Participant to Event</h2>
+<form id="registrationForm">
+  <input id="participantId" type="number" placeholder="Participant ID" required />
+  <input id="eventId" type="number" placeholder="Event ID" required />
+  <button type="submit">Register</button>
+</form>
+
+<div id="registrations"></div>
+
+
+<h2>Registrations for Event</h2>
+<input id="eventIdLookup" type="number" placeholder="Enter Event ID" />
+<button onclick="loadRegistrations()">Show Registrations</button>
+
+<div id="registrations"></div>
+  <script>
+
+    async function loadEvents() {
+      try {
+        const res = await fetch('http://localhost/EventRegistration/backend/public/events.php');
+        const events = await res.json();
+
+        const container = document.getElementById('events');
+        container.innerHTML = '';
+
+        if (events.length === 0) {
+          container.textContent = 'No events yet.';
+          return;
+        }
+
+        events.forEach(ev => {
+          const div = document.createElement('div');
+          div.className = 'event';
+          div.innerHTML = `<h3>${ev.title}</h3>
+                           <p>${ev.description}</p>
+                           <small>${ev.event_date}</small>`;
+          container.appendChild(div);
+        });
+      } catch (err) {
+        document.getElementById('events').textContent = 'Failed to load events';
+      }
+    }
+
+
+
+
+document.getElementById('eventForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const res = await fetch('http://localhost/EventRegistration/backend/public/addevent.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: document.getElementById('title').value,
+      description: document.getElementById('description').value,
+      date: document.getElementById('date').value
+    })
+  });
+  const data = await res.json();
+  alert(data.message);
+  loadEvents(); // reload list
+});
+
+    loadEvents();
+
+
+    async function loadParticipants() {
+  const res = await fetch('http://localhost/EventRegistration/backend/public/participants.php');
+  const participants = await res.json();
+  const container = document.getElementById('participants');
+  container.innerHTML = '<h3>Participants</h3>';
+  participants.forEach(p => {
+    container.innerHTML += `<p>${p.name} (${p.email})</p>`;
+  });
+}
+
+document.getElementById('participantForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const res = await fetch('http://localhost/EventRegistration/backend/public/addparticipant.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: document.getElementById('pname').value,
+      email: document.getElementById('pemail').value
+    })
+  });
+  const data = await res.json();
+  alert(data.message);
+  loadParticipants();
+});
+
+loadParticipants();
+
+
+
+document.getElementById('registrationForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const res = await fetch('http://localhost/EventRegistration/backend/public/register.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      participant_id: document.getElementById('participantId').value,
+      event_id: document.getElementById('eventId').value
+    })
+  });
+  const data = await res.json();
+  alert(data.message);
+});
+
+async function loadRegistrations() {
+  const eventId = document.getElementById('eventIdLookup').value;
+  if (!eventId) return alert("Enter an event ID");
+
+  const res = await fetch(`http://localhost/EventRegistration/backend/public/registrations.php?event_id=${eventId}`);
+  const regs = await res.json();
+
+  const container = document.getElementById('registrations');
+  container.innerHTML = '<h3>Registrations</h3>';
+
+  if (regs.length === 0) {
+    container.innerHTML += '<p>No participants registered yet.</p>';
+    return;
+  }
+
+  regs.forEach(r => {
+    container.innerHTML += `<p>${r.name} (${r.email})</p>`;
+  });
+}
+
+  </script>
+</body>
+</html>
