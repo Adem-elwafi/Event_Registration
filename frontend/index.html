@@ -2,159 +2,123 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Event Registration</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .event { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
-  </style>
+  <title>Event Registration System — Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-  <h1>Events</h1>
-  <div id="events"></div>
-<h2>Add Event</h2>
-<form id="eventForm">
-  <input id="title" placeholder="Title" required />
-  <input id="date" type="date" required />
-  <textarea id="description" placeholder="Description"></textarea>
-  <button type="submit">Add Event</button>
-</form>
-<h2>Add Participant</h2>
-<form id="participantForm">
-  <input id="pname" placeholder="Name" required />
-  <input id="pemail" type="email" placeholder="Email" required />
-  <button type="submit">Add Participant</button>
-</form>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">EventReg</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div id="mainNav" class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="events.html">Events</a></li>
+          <li class="nav-item"><a class="nav-link" href="participants.html">Participants</a></li>
+          <li class="nav-item"><a class="nav-link" href="registrations.html">Registrations</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-<div id="participants"></div>
+  <!-- Hero Section -->
+  <header class="bg-light py-5 border-bottom">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <h1 class="display-6 fw-bold">Event Registration System</h1>
+          <p class="lead mt-3">
+            Streamline your event management process with our comprehensive solution. 
+            Create events, manage participants, and handle registrations all in one place.
+          </p>
+          <a href="events.html" class="btn btn-primary me-2">Manage Events</a>
+          <a href="participants.html" class="btn btn-outline-primary">View Participants</a>
+        </div>
+        <div class="col-lg-4 mt-4 mt-lg-0">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Get Started</h5>
+              <p class="card-text">Begin by creating an event or adding participants to the system.</p>
+              <div class="d-grid gap-2">
+                <a href="events.html" class="btn btn-success">Create Event</a>
+                <a href="participants.html" class="btn btn-outline-secondary">Add Participant</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
 
-<h2>Register Participant to Event</h2>
-<form id="registrationForm">
-  <input id="participantId" type="number" placeholder="Participant ID" required />
-  <input id="eventId" type="number" placeholder="Event ID" required />
-  <button type="submit">Register</button>
-</form>
+  <!-- Features Section -->
+  <main class="container mt-5">
+    <h2 class="text-center mb-5">Key Features</h2>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Manage Events</h5>
+            <p class="card-text">Easily create, update, and delete events. Keep track of all your events in one place with detailed information.</p>
+            <a href="events.html" class="btn btn-sm btn-primary">View Events</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Manage Participants</h5>
+            <p class="card-text">Add new participants, view existing ones, and manage their information efficiently.</p>
+            <a href="participants.html" class="btn btn-sm btn-primary">View Participants</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Registrations</h5>
+            <p class="card-text">Link participants to events and manage all registrations. View event-wise registration details.</p>
+            <a href="registrations.html" class="btn btn-sm btn-primary">View Registrations</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Admin Panel</h5>
+            <p class="card-text">Secure admin section to manage all aspects of the system. Protected by authentication.</p>
+            <a href="admin.html" class="btn btn-sm btn-primary">Admin Login</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 
-<div id="registrations"></div>
+  <!-- Footer -->
+  <footer class="container mt-5 mb-4 text-muted small">
+    <hr>
+    <p class="text-center">Event Registration System &copy; 2025. Built with Bootstrap 5.</p>
+  </footer>
 
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<h2>Registrations for Event</h2>
-<input id="eventIdLookup" type="number" placeholder="Enter Event ID" />
-<button onclick="loadRegistrations()">Show Registrations</button>
-
-<div id="registrations"></div>
+  <!-- Highlight active nav link -->
   <script>
-
-    async function loadEvents() {
-      try {
-        const res = await fetch('http://localhost/EventRegistration/backend/public/events.php');
-        const events = await res.json();
-
-        const container = document.getElementById('events');
-        container.innerHTML = '';
-
-        if (events.length === 0) {
-          container.textContent = 'No events yet.';
-          return;
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+          link.classList.add('active');
+          link.setAttribute('aria-current', 'page');
         }
-
-        events.forEach(ev => {
-          const div = document.createElement('div');
-          div.className = 'event';
-          div.innerHTML = `<h3>${ev.title}</h3>
-                           <p>${ev.description}</p>
-                           <small>${ev.event_date}</small>`;
-          container.appendChild(div);
-        });
-      } catch (err) {
-        document.getElementById('events').textContent = 'Failed to load events';
-      }
-    }
-
-
-
-
-document.getElementById('eventForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const res = await fetch('http://localhost/EventRegistration/backend/public/addevent.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      title: document.getElementById('title').value,
-      description: document.getElementById('description').value,
-      date: document.getElementById('date').value
-    })
-  });
-  const data = await res.json();
-  alert(data.message);
-  loadEvents(); // reload list
-});
-
-    loadEvents();
-
-
-    async function loadParticipants() {
-  const res = await fetch('http://localhost/EventRegistration/backend/public/participants.php');
-  const participants = await res.json();
-  const container = document.getElementById('participants');
-  container.innerHTML = '<h3>Participants</h3>';
-  participants.forEach(p => {
-    container.innerHTML += `<p>${p.name} (${p.email})</p>`;
-  });
-}
-
-document.getElementById('participantForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const res = await fetch('http://localhost/EventRegistration/backend/public/addparticipant.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: document.getElementById('pname').value,
-      email: document.getElementById('pemail').value
-    })
-  });
-  const data = await res.json();
-  alert(data.message);
-  loadParticipants();
-});
-
-loadParticipants();
-
-
-
-document.getElementById('registrationForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const res = await fetch('http://localhost/EventRegistration/backend/public/register.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      participant_id: document.getElementById('participantId').value,
-      event_id: document.getElementById('eventId').value
-    })
-  });
-  const data = await res.json();
-  alert(data.message);
-});
-
-async function loadRegistrations() {
-  const eventId = document.getElementById('eventIdLookup').value;
-  if (!eventId) return alert("Enter an event ID");
-
-  const res = await fetch(`http://localhost/EventRegistration/backend/public/registrations.php?event_id=${eventId}`);
-  const regs = await res.json();
-
-  const container = document.getElementById('registrations');
-  container.innerHTML = '<h3>Registrations</h3>';
-
-  if (regs.length === 0) {
-    container.innerHTML += '<p>No participants registered yet.</p>';
-    return;
-  }
-
-  regs.forEach(r => {
-    container.innerHTML += `<p>${r.name} (${r.email})</p>`;
-  });
-}
-
+      });
+    });
   </script>
 </body>
 </html>

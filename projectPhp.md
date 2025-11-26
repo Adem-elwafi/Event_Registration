@@ -475,3 +475,290 @@ fetch('registrations.php?event_id=5')
 ```
 
 ---
+
+### Q12: How $stmt gets execute() and fetch() methods (2025-11-26)
+**Question:** How does `$stmt` have methods like `execute()` and `fetch()` just by setting it equal to `prepare()`?
+
+**Code:**
+```php
+$stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ?");
+$stmt->execute([$username]);
+$admin = $stmt->fetch();
+```
+
+**Explanation:**
+
+`$stmt` gets those methods because `prepare()` returns a **PDOStatement object**, which has those methods built into it.
+
+**Step-by-step:**
+
+1. **`$pdo->prepare("SELECT ...")`**
+   - Returns a **PDOStatement object**
+   - This is an instance of PHP's built-in `PDOStatement` class
+
+2. **`$stmt = ...`**
+   - Stores that PDOStatement object in the variable
+   - Now `$stmt` IS a PDOStatement object
+
+3. **PDOStatement class has built-in methods:**
+   - `execute()` - Run the query with parameter values
+   - `fetch()` - Get one row from results
+   - `fetchAll()` - Get all rows from results
+   - `rowCount()` - Count affected rows
+   - And more...
+
+**Object types:**
+- `$pdo` = PDO object (database connection)
+  - Methods: `prepare()`, `query()`, `beginTransaction()`
+- `$stmt` = PDOStatement object (prepared query)
+  - Methods: `execute()`, `fetch()`, `fetchAll()`, `rowCount()`
+
+**Analogy:**
+```php
+$pizza = pizzaShop->order("pepperoni");  // Returns Pizza object
+$pizza->slice();                          // Pizza object has slice() method
+$pizza->eat();                            // Pizza object has eat() method
+```
+
+The methods aren't added by you - they're already part of the PDOStatement class that PHP provides!
+
+**Why it works:**
+- `prepare()` creates a statement object that "remembers" your SQL query
+- `execute()` fills in placeholders and runs the query
+- `fetch()` retrieves results from that same statement object
+- The statement object holds both the query and the results
+
+**In short:** Setting `$stmt = $pdo->prepare()` gives you a PDOStatement object, which comes with execute(), fetch(), and other methods pre-built by PHP.
+
+---
+
+### Q13: Understanding $_SESSION and session management (2025-11-26)
+**Question:** What is `$_SESSION`? Where does it start and what does it contain?
+
+**Code:**
+```php
+session_start();
+
+function loginAdmin($pdo, $username, $password) {
+    $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ?");
+    $stmt->execute([$username]);
+    $admin = $stmt->fetch();
+
+    if ($admin && password_verify($password, $admin['password'])) {
+        $_SESSION['admin_id'] = $admin['admin_id'];
+        return ['success' => true, 'message' => 'Login successful'];
+    }
+    return ['success' => false, 'message' => 'Invalid credentials'];
+}
+```
+
+**Explanation:**
+
+**What is `$_SESSION`?**
+- A special PHP array (superglobal) that stores data **across multiple page requests**
+- Keeps user data "alive" as they navigate your site
+- Unique for each visitor to your website
+
+**Where does it start?**
+```php
+session_start();  // Must be called before using $_SESSION
+```
+- Creates or resumes a session for the current user
+- PHP generates a unique session ID and stores it in a cookie on the user's browser
+- Must be called at the top of any file that uses `$_SESSION`
+
+**What does it contain?**
+- Initially: empty array `[]`
+- After you store data: whatever you put in it
+- Data persists across page requests until session ends
+
+**How it works:**
+
+1. **First page load (before login):**
+```php
+session_start();
+// $_SESSION = []  (empty)
+```
+
+2. **After successful login:**
+```php
+$_SESSION['admin_id'] = $admin['admin_id'];
+// $_SESSION = ['admin_id' => 5]
+```
+
+3. **Next page request (different PHP file):**
+```php
+session_start();  // Resumes the same session
+// $_SESSION still has ['admin_id' => 5] ✓
+```
+
+4. **After logout:**
+```php
+session_destroy();
+// $_SESSION = []  (cleared)
+```
+
+**How sessions persist:**
+- PHP stores session data in a file on the server
+- User's browser gets a cookie with session ID (e.g., `PHPSESSID=abc123xyz`)
+- Each request sends that cookie → PHP loads matching session data → `$_SESSION` is populated
+
+**Example: `$admin` vs `$_SESSION`**
+
+`$admin` (from `fetch()`):
+```php
+$admin = [
+    'admin_id' => 5,
+    'username' => 'sarah_admin',
+    'password' => '$2y$10$hashedPassword...'
+];
+```
+
+`$_SESSION` (after storing):
+```php
+$_SESSION = [
+    'admin_id' => 5  // Only store the ID, not password!
+];
+```
+
+**Timeline example:**
+
+**Request 1 - Login page (login.php):**
+```php
+session_start();
+$_SESSION['admin_id'] = 5;
+// Server: Creates session file with data
+// Browser: Gets cookie PHPSESSID=abc123
+```
+
+**Request 2 - Events page (events.php):**
+```php
+session_start();
+// Browser sends: Cookie with PHPSESSID=abc123
+// PHP loads session file
+// $_SESSION = ['admin_id' => 5]  ✓ Still there!
+
+if (isset($_SESSION['admin_id'])) {
+    echo "You're logged in!";
+}
+```
+
+**Request 3 - Logout (logout.php):**
+```php
+session_start();
+session_destroy();
+// Deletes session file
+// $_SESSION = []  ✓ Gone!
+```
+
+**In your authentication system:**
+- **Login** stores admin ID in session → User is "logged in"
+- **`requireAdmin()`** checks if session has admin ID → Verifies they're logged in
+- **Logout** destroys session → User is "logged out"
+
+---
+
+## CORS and Parameter Handling Issue (2025-11-26)
+
+### Problem: 400 Bad Request when Deleting Participants
+When trying to delete a participant, the frontend was receiving a 400 Bad Request error. The issue was caused by a mismatch in parameter naming between the frontend and backend.
+
+### Root Causes:
+1. **CORS Preflight**: The browser was sending an OPTIONS request first, which wasn't being handled properly
+2. **Parameter Naming**: The frontend was sending `participant_id` but the backend was expecting `id`
+3. **Error Handling**: Insufficient error reporting made it difficult to diagnose the issue
+
+### Solution:
+1. **Proper CORS Headers**: Added comprehensive CORS headers to handle preflight requests
+   ```php
+   header('Access-Control-Allow-Origin: *');
+   header('Access-Control-Allow-Methods: POST, OPTIONS');
+   header('Access-Control-Allow-Headers: Content-Type');
+   ```
+2. **Parameter Flexibility**: Updated the backend to handle multiple parameter names
+   ```php
+   $possibleKeys = ['participant_id', 'id', 'participantId'];
+   foreach ($possibleKeys as $key) {
+       if (isset($input[$key]) && is_numeric($input[$key])) {
+           $participantId = (int)$input[$key];
+           break;
+       }
+   }
+   ```
+3. **Enhanced Logging**: Added detailed error logging to help with debugging
+   ```php
+   $rawInput = file_get_contents('php://input');
+   file_put_contents('debug.log', date('Y-m-d H:i:s') . " - Raw input: " . $rawInput . "\n", FILE_APPEND);
+   ```
+
+### Key Learnings:
+1. Always handle CORS preflight requests (OPTIONS) properly
+2. Be consistent with parameter naming between frontend and backend
+3. Implement detailed logging for API endpoints to simplify debugging
+4. Validate and sanitize all input parameters
+5. Use proper error handling and meaningful error messages
+
+**Security note:** Never store sensitive data like passwords in `$_SESSION` - only store the user ID to identify them.
+
+---
+
+### Q14: Why session_start() before session_destroy() (2025-11-26)
+**Question:** In the logout function, why do we need `session_start()` before `session_destroy()`? Why not destroy the session directly?
+
+**Code:**
+```php
+function logoutAdmin() {
+    session_start();
+    session_destroy();
+    return ['success' => true, 'message' => 'Logged out'];
+}
+```
+
+**Explanation:**
+
+You need `session_start()` before `session_destroy()` because **you can't destroy something that isn't loaded yet**.
+
+**Why `session_start()` is required:**
+
+`session_destroy()` needs an active session to destroy:
+- When logout is called, PHP doesn't automatically know which session to destroy
+- `session_start()` loads the session data from the server (using the session ID from the cookie)
+- Only then can `session_destroy()` delete that session file
+
+**Without `session_start()` (won't work):**
+```php
+function logoutAdmin() {
+    session_destroy();  // ❌ ERROR!
+}
+// PHP Warning: session_destroy(): Trying to destroy uninitialized session
+```
+
+**With `session_start()` (works correctly):**
+```php
+function logoutAdmin() {
+    session_start();     // ✓ Load session (identify which one)
+    session_destroy();   // ✓ Now destroy it
+}
+```
+
+**Step-by-step flow:**
+
+1. **User clicks logout**
+2. **`session_start()` runs:**
+   - Browser sends cookie: `PHPSESSID=abc123`
+   - PHP finds session file matching `abc123` on server
+   - Loads that session into memory
+3. **`session_destroy()` runs:**
+   - Deletes that specific session file from server
+   - Clears `$_SESSION` array
+   - User is now logged out
+
+**Analogy:**
+- Session = Locker at the gym
+- `session_start()` = Open your locker (using your key/ID)
+- `session_destroy()` = Empty the locker and remove it
+- **You can't empty a locker without opening it first!**
+
+**In short:** `session_start()` tells PHP **which** session to destroy (by loading it first using the cookie), then `session_destroy()` deletes it from the server.
+
+---

@@ -1,0 +1,7 @@
+2025-11-26 16:31:12 - Raw input: {"id":3}
+2025-11-26 16:31:12 - Decoded input: Array
+(
+    [id] => 3
+)
+
+2025-11-26 16:31:12 - Attempting to delete participant with ID: 3

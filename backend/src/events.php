@@ -14,4 +14,35 @@ function createEvent($pdo, $title, $description, $event_date) {
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
     }
+
+}
+
+
+function updateEvent($pdo, $id, $title, $description, $event_date) {
+    if (empty($id) || empty($title) || empty($event_date)) {
+        return ['success' => false, 'message' => 'ID, title, and date are required'];
+    }
+
+    try {
+        $sql = "UPDATE events SET title = ?, description = ?, event_date = ? WHERE event_id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$title, $description, $event_date, $id]);
+        return ['success' => true, 'message' => 'Event updated successfully'];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
+    }
+}
+
+function deleteEvent($pdo, $id) {
+    if (empty($id)) {
+        return ['success' => false, 'message' => 'Event ID is required'];
+    }
+
+    try {
+        $stmt = $pdo->prepare("DELETE FROM events WHERE event_id = ?");
+        $stmt->execute([$id]);
+        return ['success' => true, 'message' => 'Event deleted successfully'];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
+    }
 }
