@@ -30,16 +30,15 @@
     </div>
   </nav>
 
-  <div class="container mt-4">
+  <div class="container mt-4" style="max-width: 900px; padding-left: 24px; padding-right: 24px;">
     <h1 class="mb-4">Admin Panel</h1>
-    
     <!-- Status Message -->
     <div id="statusMessage" class="alert d-none"></div>
 
     <!-- Login Form (initially visible) -->
-    <div id="loginCard" class="card mb-4">
-      <div class="card-header">Login</div>
-      <div class="card-body">
+    <div id="loginCard" class="card shadow-sm mb-4">
+      <div class="card-header px-4 py-3">Login</div>
+      <div class="card-body px-4 py-3">
         <form id="loginForm">
           <div class="mb-3">
             <label class="form-label">Username</label>
@@ -56,9 +55,9 @@
     </div>
 
     <!-- Admin Panel (initially hidden) -->
-    <div id="adminPanel" class="card mb-4 hidden">
-      <div class="card-header">Welcome, <span id="adminName">Admin</span>!</div>
-      <div class="card-body">
+    <div id="adminPanel" class="card shadow-sm mb-4 hidden">
+      <div class="card-header px-4 py-3">Welcome, <span id="adminName">Admin</span>!</div>
+      <div class="card-body px-4 py-3">
         <p>You are now logged in to the admin panel.</p>
         <button id="logoutBtn" class="btn btn-secondary">Logout</button>
       </div>

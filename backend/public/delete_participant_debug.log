@@ -1,7 +1,28 @@
-2025-11-26 16:31:12 - Raw input: {"id":3}
-2025-11-26 16:31:12 - Decoded input: Array
+2025-11-27 09:24:35 - Raw input: {"participant_id":1}
+2025-11-27 09:24:35 - Decoded input: Array
 (
-    [id] => 3
+    [participant_id] => 1
 )
 
-2025-11-26 16:31:12 - Attempting to delete participant with ID: 3
+2025-11-27 09:24:35 - Attempting to delete participant with ID: 1
+2025-11-27 09:25:38 - Raw input: {"participant_id":2}
+2025-11-27 09:25:38 - Decoded input: Array
+(
+    [participant_id] => 2
+)
+
+2025-11-27 09:25:38 - Attempting to delete participant with ID: 2
+2025-11-27 10:24:40 - Raw input: {"participant_id":4}
+2025-11-27 10:24:40 - Decoded input: Array
+(
+    [participant_id] => 4
+)
+
+2025-11-27 10:24:40 - Attempting to delete participant with ID: 4
+2025-11-27 10:25:33 - Raw input: {"participant_id":5}
+2025-11-27 10:25:33 - Decoded input: Array
+(
+    [participant_id] => 5
+)
+
+2025-11-27 10:25:33 - Attempting to delete participant with ID: 5
