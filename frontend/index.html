@@ -9,11 +9,32 @@
   <link rel="stylesheet" href="global.css">
 </head>
 <body>
-  <!-- Removed intro overlay -->
-  <div class="bg-overlay"></div>
-    <style>
-      /* Removed intro overlay animation */
-    </style>
+  <!-- Guided Tour Overlay -->
+  <div id="tour-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:1050; background:rgba(0,0,0,0.4); pointer-events:auto;"></div>
+  <div id="tour-modal" style="display:none; position:absolute; z-index:1060; min-width:260px; max-width:350px; background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.18); padding:24px 20px 20px 20px; text-align:center;"></div>
+  <svg id="tour-arrow" style="display:none; position:absolute; z-index:1061; pointer-events:none;" width="80" height="80">
+    <defs>
+      <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L6,3 Z" fill="#007bff" />
+      </marker>
+    </defs>
+    <line id="arrow-line" x1="0" y1="0" x2="80" y2="80" stroke="#007bff" stroke-width="4" marker-end="url(#arrowhead)" />
+  </svg>
+  <div id="tour-confetti" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:1070; pointer-events:none;"></div>
+  <style>
+    #tour-overlay {transition: background 0.3s;}
+    #tour-modal {transition: top 0.3s, left 0.3s;}
+    .tour-highlight {
+      position:relative;
+      z-index:1065 !important;
+      box-shadow:0 0 0 6px #007bff80, 0 4px 24px rgba(0,0,0,0.18);
+      border-radius:8px;
+      transition: box-shadow 0.3s;
+    }
+    @media (max-width: 600px) {
+      #tour-modal {min-width:180px; max-width:95vw; padding:16px 8px 12px 8px;}
+    }
+  </style>
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
@@ -125,6 +146,174 @@
           link.setAttribute('aria-current', 'page');
         }
       });
+      // Guided Tour Logic
+      if (!localStorage.getItem('eventreg_tour_done')) {
+        setTimeout(startTour, 600);
+      }
+      function startTour() {
+        const steps = [
+          {
+            selector: '.btn-success',
+            title: 'Create Your First Event',
+            text: 'Click here to start by creating a new event. Events are the core of your registration system.',
+          },
+          {
+            selector: '.btn-outline-secondary',
+            title: 'Add Participants',
+            text: 'Add people who will participate in your events. You can manage their details anytime.',
+          },
+          {
+            selector: '.btn-primary.me-2',
+            title: 'Manage Events',
+            text: 'View and manage all your events here. You can edit or delete events as needed.',
+          },
+          {
+            selector: '.btn-outline-primary',
+            title: 'View Participants',
+            text: 'See all participants registered in your system.',
+          },
+          {
+            selector: '.btn.btn-sm.btn-primary[href="admin.html"]',
+            title: 'Admin Panel',
+            text: 'Access the admin panel for advanced management and settings. Secure and protected.',
+          },
+        ];
+        let step = 0;
+        const overlay = document.getElementById('tour-overlay');
+        const modal = document.getElementById('tour-modal');
+        const arrow = document.getElementById('tour-arrow');
+        const arrowLine = document.getElementById('arrow-line');
+        const confetti = document.getElementById('tour-confetti');
+        function showStep(idx) {
+          // Remove highlight from previous
+          document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+          if (idx >= steps.length) {
+            endTour();
+            return;
+          }
+          const stepObj = steps[idx];
+          const target = document.querySelector(stepObj.selector);
+          if (!target) {
+            // If not found, skip to next
+            showStep(idx+1);
+            return;
+          }
+          // Highlight
+          target.classList.add('tour-highlight');
+          // Show overlay
+          overlay.style.display = 'block';
+          overlay.style.pointerEvents = 'auto';
+          // Show modal
+          modal.innerHTML = `<h5 style='color:#007bff;'>${stepObj.title}</h5><p class='mb-3'>${stepObj.text}</p><button class='btn btn-primary btn-sm' id='tour-next'>${idx === steps.length-1 ? 'Finish' : 'Next'}</button>`;
+          modal.style.display = 'block';
+          // Position modal above target
+          positionModal(target, modal, arrow);
+          // Draw arrow
+          drawArrow(modal, target, arrow, arrowLine);
+          arrow.style.display = 'block';
+          // Next button
+          document.getElementById('tour-next').onclick = function() {
+            showStep(idx+1);
+          };
+          // Scroll into view if needed
+          setTimeout(() => {target.scrollIntoView({behavior:'smooth', block:'center'});}, 200);
+        }
+        function positionModal(target, modal, arrow) {
+          const rect = target.getBoundingClientRect();
+          const modalRect = modal.getBoundingClientRect();
+          let top = window.scrollY + rect.top - modalRect.height - 24;
+          let left = window.scrollX + rect.left + rect.width/2 - modalRect.width/2;
+          // If modal would be offscreen, adjust
+          if (top < 10) top = window.scrollY + rect.bottom + 24;
+          if (left < 10) left = 10;
+          if (left + modalRect.width > window.innerWidth - 10) left = window.innerWidth - modalRect.width - 10;
+          modal.style.top = top + 'px';
+          modal.style.left = left + 'px';
+        }
+        function drawArrow(modal, target, arrow, arrowLine) {
+          const tRect = target.getBoundingClientRect();
+          const mRect = modal.getBoundingClientRect();
+          let startX = mRect.left + mRect.width/2;
+          let startY = mRect.top + mRect.height;
+          let endX = tRect.left + tRect.width/2;
+          let endY = tRect.top + tRect.height/2;
+          // Position SVG
+          let svgLeft = Math.min(startX, endX) - 40;
+          let svgTop = Math.min(startY, endY) - 40;
+          let width = Math.abs(endX - startX) + 80;
+          let height = Math.abs(endY - startY) + 80;
+          arrow.style.left = svgLeft + 'px';
+          arrow.style.top = svgTop + 'px';
+          arrow.setAttribute('width', width);
+          arrow.setAttribute('height', height);
+          // Line coords relative to SVG
+          arrowLine.setAttribute('x1', startX - svgLeft);
+          arrowLine.setAttribute('y1', startY - svgTop);
+          arrowLine.setAttribute('x2', endX - svgLeft);
+          arrowLine.setAttribute('y2', endY - svgTop);
+        }
+        function endTour() {
+          // Remove highlight
+          document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+          overlay.style.display = 'none';
+          modal.style.display = 'none';
+          arrow.style.display = 'none';
+          // Confetti animation
+          confetti.style.display = 'block';
+          confetti.innerHTML = `<div style='position:absolute;top:40vh;left:50%;transform:translateX(-50%);text-align:center;'><h1 style='font-size:2.5rem;color:#007bff;font-weight:bold;'>You’re Ready!</h1></div>`;
+          launchConfetti(confetti);
+          setTimeout(()=>{confetti.style.display='none'; localStorage.setItem('eventreg_tour_done','1');}, 3200);
+        }
+        function launchConfetti(container) {
+          // Simple confetti
+          for(let i=0;i<60;i++){
+            let d = document.createElement('div');
+            d.style.position='absolute';
+            d.style.width='12px';
+            d.style.height='12px';
+            d.style.borderRadius='50%';
+            d.style.background=randomColor();
+            d.style.left=Math.random()*window.innerWidth+'px';
+            d.style.top='-30px';
+            d.style.opacity='0.85';
+            d.style.zIndex='1071';
+            d.style.transition='top 2.8s cubic-bezier(.2,.8,.2,1), left 2.8s linear';
+            container.appendChild(d);
+            setTimeout(()=>{
+              d.style.top=(window.innerHeight*0.8*Math.random()+window.innerHeight*0.2)+'px';
+              d.style.left=(parseFloat(d.style.left)+Math.random()*120-60)+'px';
+            }, 50);
+            setTimeout(()=>{d.remove();}, 3000);
+          }
+        }
+        function randomColor(){
+          const colors=['#007bff','#28a745','#ffc107','#dc3545','#6610f2','#20c997','#fd7e14','#6f42c1'];
+          return colors[Math.floor(Math.random()*colors.length)];
+        }
+        // Responsive: reposition modal/arrow on resize/scroll
+        window.addEventListener('resize', ()=>{
+          const stepObj = steps[step];
+          if (modal.style.display==='block' && stepObj) {
+            const target = document.querySelector(stepObj.selector);
+            if (target) {
+              positionModal(target, modal, arrow);
+              drawArrow(modal, target, arrow, arrowLine);
+            }
+          }
+        });
+        window.addEventListener('scroll', ()=>{
+          const stepObj = steps[step];
+          if (modal.style.display==='block' && stepObj) {
+            const target = document.querySelector(stepObj.selector);
+            if (target) {
+              positionModal(target, modal, arrow);
+              drawArrow(modal, target, arrow, arrowLine);
+            }
+          }
+        });
+        // Start first step
+        showStep(step);
+      }
     });
   </script>
 </body>

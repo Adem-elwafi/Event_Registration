@@ -26,3 +26,10 @@
 )
 
 2025-11-27 10:25:33 - Attempting to delete participant with ID: 5
+2025-11-28 12:38:49 - Raw input: {"participant_id":6}
+2025-11-28 12:38:49 - Decoded input: Array
+(
+    [participant_id] => 6
+)
+
+2025-11-28 12:38:49 - Attempting to delete participant with ID: 6
